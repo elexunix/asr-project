@@ -1,0 +1,54 @@
+#FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+#FROM pytorch/pytorch:latest
+FROM ubuntu:latest
+#FROM sorokine/docker-colab-local
+
+#RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
+RUN apt update && apt install -y vim tmux wget python3-pip git && apt upgrade -y
+#RUN echo "Etc/UTC" > /etc/timezone
+#ENV TZ=Etc/UTC
+RUN DEBIAN_FRONTEND=noninteractive apt install -y tzdata
+RUN pip3 install -U pip
+
+# Install requirements for torchaudio
+#RUN pip install sox && conda install torchaudio==0.11.0 -c pytorch && conda install -c conda-forge librosa
+
+# Set the user and group IDs of the host user
+ARG USER_ID
+ARG GROUP_ID
+# Create a new user inside the container with the same IDs as the host user
+RUN addgroup --gid $GROUP_ID sample-elexunix
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID sample-elexunix
+# Set the working directory to a directory accessible by the sample-elexunix user
+WORKDIR /outer
+# Give ownership of the working directory to the new user
+RUN chown sample-elexunix /outer
+# Grant the next user passwordless sudo
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y sudo
+RUN echo 'sample-elexunix ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# Switch to the newly created user
+USER sample-elexunix
+
+RUN sudo apt update && sudo apt install -y python3-pip libsndfile1
+
+#RUN sudo apt install -y dselect
+#COPY colab-dpkg-selections .
+#RUN sudo dpkg --set-selections < colab-dpkg-selections
+#RUN sudo apt upgrade -y
+#RUN sudo sh -c '(yes | dselect install); echo $?' && 0
+
+RUN sudo apt install -o DPkg::Options::=--force-confdef -y libgdal-dev libcairo2-dev r-base
+ENV GDAL_CONFIG=/usr/bin/gdal-config
+ENV R_HOME=/usr/lib/R
+ENV RPY2_CFFI_MODE=ABI
+RUN pip3 install rpy2
+
+COPY requirements* .
+RUN pip3 install -r requirements-colab
+RUN pip3 install -r requirements-asr
+
+ENV WANDB_DIR=wandb
+ENV WANDB_API_KEY=f30f7ed517b2208928a211969cb96c42eb17ec7b
+# da-da, not very safe way, but this file is private itself, so no problems)
+
+EXPOSE 3000
