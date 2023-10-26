@@ -1,0 +1,26 @@
+\documentclass[a4paper]{article}
+\usepackage{graphicx}
+\usepackage[total={7.3in,9in}]{geometry}
+
+\begin{document}
+\begin{center} \Large Deep Learning in Audio, Homework 1: Automatic Speech Recognition \end{center}
+\hspace*\fill Alexey Slizkov\\
+\hspace*\fill 26.10.2023
+
+I have implemented the steps of the instruction, also beam search and beam search with LM (using 3rd party lib). The metrics of BSwLM are significantly better than those without.
+
+I have a total of 176 wanbd runs, though most of them were interrupted early. Here is the summary of the most successful ones (BS\&LM metrics not present here, only plain model):
+
+\begin{center} \includegraphics[width=550pt]{experiments.png} \end{center}
+
+I claim a 0.189 test-clean WER, please check output.json, the output of test.py.
+
+More precisely, I have:
+
+\begin{center} \includegraphics[width=400pt]{cer-wer-final.png} \end{center}
+
+Please check the graphs and all the statistics of my runs in wandb, the relevant ones are listen at the first picture.
+
+If you want to reproduce and run train.py and test.py yourself, please check the readme file.
+
+\end{document}
